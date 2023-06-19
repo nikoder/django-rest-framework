@@ -3,6 +3,7 @@ Helper classes for parsers.
 """
 
 import contextlib
+import dataclasses
 import datetime
 import decimal
 import json  # noqa
@@ -50,6 +51,8 @@ class JSONEncoder(json.JSONEncoder):
         elif isinstance(obj, bytes):
             # Best-effort for binary blobs. See #4187.
             return obj.decode()
+        elif dataclasses.is_dataclass(obj):
+            return dataclasses.asdict(obj)
         elif hasattr(obj, 'tolist'):
             # Numpy arrays and array scalars.
             return obj.tolist()
