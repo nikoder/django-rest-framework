@@ -1,3 +1,4 @@
+import dataclasses
 from datetime import date, datetime, timedelta, timezone
 from decimal import Decimal
 from uuid import uuid4
@@ -77,6 +78,23 @@ class JSONEncoderTests(TestCase):
         """
         unique_id = uuid4()
         assert self.encoder.default(unique_id) == str(unique_id)
+
+    def test_encode_dataclass(self):
+        """
+        Tests encoding a dataclass object with nesting
+        """
+        @dataclasses.dataclass
+        class Inner:
+            f: float = 1.0
+
+        @dataclasses.dataclass
+        class Outer:
+            s: str = 'a'
+            i: int = 1
+            d: dict = dataclasses.field(default_factory=lambda: {'nested': Inner()})
+
+        instance = Outer()
+        assert self.encoder.default(instance) == {'s': 'a', 'i': 1, 'd': {'nested': {'f': 1.0}}}
 
     @pytest.mark.skipif(not coreapi, reason='coreapi is not installed')
     def test_encode_coreapi_raises_error(self):
